@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+
+# (C) 2015 by Tomasz bla Fortuna
+# License: BSD / MIT
+
+"""
+Entry point for WifiLogger tool.
+"""
+
+try:
+    from wflogger import main
+except ImportError:
+    print("Unable to find and import the `wflogger' module - make sure it's")
+    print("installed in your site-packages/dist-packages directories or available")
+    print("at PYTHONPATH environment")
+    print()
+    raise
+
+if __name__ == "__main__":
+   main.run()
