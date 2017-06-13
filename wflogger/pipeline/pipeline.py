@@ -68,8 +68,12 @@ class PipelineBuilder:
         "Build pipeline using given configuration"
         pipeline = []
         for stage_def in configuration:
-            assert len(stage_def) == 1
-            stage_name, stage_config = list(stage_def.items())[0]
+            if isinstance(stage_def, str):
+                # Stage without configuration
+                stage_name, stage_config = stage_def, {}
+            else:
+                assert len(stage_def) == 1
+                stage_name, stage_config = list(stage_def.items())[0]
 
             stage_cls = PipelineBuilder._registered.get(stage_name, None)
             if stage_cls is None:

@@ -59,12 +59,16 @@ class Sniffer(object):
         sniff_begin = time()
         stat_prev = sniff_begin
         stat_every = 3 # seconds
+
+        if self.hopper is not None:
+            self.hopper.hop()
+
         while True:
             start = time()
 
             # This catches KeyboardInterrupt,
-            # TODO: Disable this catching + Probably hop on another thread and use prn argument.
-            # But then - you'd have watchdog problems.
+            # TODO: Disable this catching + Probably hop on another
+            # thread and use prn argument.
             pkts = sendrecv.sniff(iface=self.interface, count=20, timeout=0.1)
             pkts_all += len(pkts)
             for pkt in pkts:
@@ -73,10 +77,10 @@ class Sniffer(object):
                     continue
 
                 # Decorate with current hopper configuration
-                if self.hopper:
-                    data['ch'] = self.hopper.channel_number
+                if self.hopper is not None:
+                    data['channel_hopper'] = self.hopper.channel_number
                 else:
-                    data['ch'] = -1
+                    data['channel_hopper'] = -1
 
                 data['sniffer'] = self.sniffer_name
 
@@ -87,13 +91,13 @@ class Sniffer(object):
                     # Increase karma when client traffic is detected
                     self.hopper.increase_karma()
 
+                # Lists are serializable, sets no - convert.
                 data['tags'] = list(data['tags'])
                 yield data
 
-            now = time()
-            took = now - start
-
+            # Show stats
             if stat_prev + stat_every < now:
+                now = time()
                 took = time() - sniff_begin
                 s = "STAT: pkts=%d t_total=%.2fs pps=%.2f"
                 s %= (pkts_all, took, pkts_all / took)

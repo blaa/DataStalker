@@ -5,12 +5,9 @@
 Utility functions for handling time
 """
 import pytz
-# import config
+import tzlocal
 
-# TODO: Get from yaml file or from system.
-LOCAL_TIMEZONE = pytz.timezone('Europe/Warsaw')
-
-#LOCAL_TIMEZONE = pytz.timezone(config.local_timezone)
+LOCAL_TIMEZONE = tzlocal.get_localzone()
 UTC = pytz.utc
 
 def normalize(timestamp):

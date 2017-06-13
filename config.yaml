@@ -22,7 +22,7 @@ pipeline:
         ]
         hop_tries: 10
 
-  - print:
+  - print
 
   - limit:
       seconds: 10

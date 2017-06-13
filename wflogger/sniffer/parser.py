@@ -170,15 +170,13 @@ class PacketParser:
                     continue # After vendor, there are dragons
                 if p.len != len(p.info) or p.len != 1:
                     msg = "LENGTH %s DOESNT MATCH FOR CHANNEL type/subtype %d/%d" % (p.len, d_type, d_subtype)
-                    print(msg)
-                    log.info(msg)
+                    log.warning(msg)
                     continue
                 if data['channel'] is None:
                     data['channel'] = ord(p.info)
                     if data['channel'] < 0 or data['channel'] > 13:
                         msg = 'Ignoring invalid channel value for type/subtype %d/%d' % (d_type, d_subtype)
-                        print(msg)
-                        log.info(msg)
+                        log.warning(msg)
                         data['channel'] = None
 
             elif p.ID == ELT_RSN:
@@ -241,8 +239,11 @@ class PacketParser:
             'timestamp_local': p.time,
             'src': mac_source,
             'dst': mac_dst,
+
             'strength': sig_str,
             'freq': freq,
+            'antenna': antenna,
+
             'broadcast': broadcast,
 
             # Defaults for dot11 parsing
