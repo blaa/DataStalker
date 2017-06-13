@@ -1,4 +1,5 @@
-from IPython import embed
+# (C) 2015 - 2017 by Tomasz bla Fortuna
+# License: MIT
 
 from wflogger.pipeline import SourceStage
 

@@ -1,5 +1,5 @@
-# Author: Tomasz bla Fortuna
-# License: MIT / BSD
+# (C) 2015 - 2017 by Tomasz bla Fortuna
+# License: MIT
 
 import os
 import sys

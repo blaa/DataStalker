@@ -1,3 +1,5 @@
+# (C) 2015 - 2017 by Tomasz bla Fortuna
+# License: MIT
 
 """
 Pipeline interface definition. Not required really,
@@ -9,7 +11,7 @@ class Stage:
     Stage which reads data from previous stage and yields new data
     """
     def handle(self, data):
-        "Handle incoming data and yield result"
+        "Handle incoming data and return result"
         raise NotImplementedError
 
     @classmethod

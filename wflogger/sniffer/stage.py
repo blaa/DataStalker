@@ -1,3 +1,6 @@
+# (C) 2015 - 2017 by Tomasz bla Fortuna
+# License: MIT
+
 from wflogger.pipeline import SourceStage, Pipeline
 
 from wflogger.sniffer import Sniffer, Hopper

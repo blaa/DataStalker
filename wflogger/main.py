@@ -1,5 +1,5 @@
-# Author: Tomasz bla Fortuna
-# License: BSD / MIT
+# (C) 2015 - 2017 by Tomasz bla Fortuna
+# License: MIT
 
 import sys
 import os
@@ -81,12 +81,12 @@ def action_version(args):
         "Wifi Logger / Wifistalker\n"
         "Curent version:   {0}\n"
         "Project author:   Tomasz bla Fortuna\n"
-        "Backend license:  wflogger - MIT / BSD dual licensing; PythonWiFi LGPL\n"
+        "Backend license:  wflogger - MIT; PythonWiFi LGPL\n"
     ).format(version.VERSION_STRING))
 
 
 def run():
-    "Run WifiLogger"
+    "Run WFLogger"
     parser, args = _parse_arguments()
 
     if args.run:
