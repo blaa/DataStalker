@@ -34,8 +34,10 @@ pipeline:
   #    max_time_between: 120
 
   - elasticsearch:
-      hostname: '127.0.0.1'
-      port: 9200
+      hosts: ['127.0.0.1:9200']
 
       time_field: '@timestamp'
       index_template: 'ds-%Y%m%d'
+      doc_type: 'frames'
+
+      mapping: {}

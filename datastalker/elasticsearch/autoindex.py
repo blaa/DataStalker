@@ -12,10 +12,11 @@ class AutoIndex(object):
         # Keep them and don't recreate them.
         self._created_idx = set()
 
-    def get_index(self, date):
+    def get_index(self, entry):
         "Get index name for given date"
-        d = date.strftime('%Y-%m') if self.monthly else date.strftime('%Y-%m-%d')
-        return self.index_base + '-' + d
+        date = entry[self.time_field]
+        name = date.strftime(self.time_field)
+        return name
 
     def get_schema(self):
         "Returns dictionary with index configuration"
@@ -28,7 +29,7 @@ class AutoIndex(object):
 
         settings = self.get_schema()
 
-        if not self.db.es.indices.exists(index=index_name):
-            self.db.es.indices.create(index=index_name, body=settings)
+        if not self.es.indices.exists(index=index_name):
+            self.es.indices.create(index=index_name,
+                                   body=settings)
             self._created_idx.add(index_name)
-
