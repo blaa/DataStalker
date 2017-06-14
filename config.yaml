@@ -33,7 +33,9 @@ pipeline:
   #    max_str_deviation: 5
   #    max_time_between: 120
 
-  #- elasticsearch:
-  #    hostname: '127.0.0.1'
-  #    index: 'wflogger-{year:04}{month:02}{day:02}'
-  #    port: 9200
+  - elasticsearch:
+      hostname: '127.0.0.1'
+      port: 9200
+
+      time_field: '@timestamp'
+      index_template: 'ds-%Y%m%d'
