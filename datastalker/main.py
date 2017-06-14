@@ -4,6 +4,7 @@
 import sys
 import os
 import logging
+import argparse
 
 import yaml
 
@@ -11,7 +12,7 @@ from datastalker import version
 from datastalker.pipeline import Pipeline
 
 # Register stages
-from datastalker import sniffer
+from datastalker import wifisniffer
 
 # Install faulthandler if it's available.
 try:
@@ -25,9 +26,9 @@ except ImportError:
 
 def _parse_arguments():
     "Parse command line arguments"
-    import argparse
 
-    p = argparse.ArgumentParser(description='DataStalker - gather, decorate and store metainformation from traffic')
+    desc = 'DataStalker - gather, decorate and store metainformation from traffic'
+    p = argparse.ArgumentParser(description=desc)
     act = p.add_argument_group('actions')
 
     act.add_argument("--run", dest="run",
@@ -48,9 +49,12 @@ def _parse_arguments():
 
 def action_run(args):
     "Run a pipeline"
-
-    with open(args.config, 'r') as cfg:
-        config = yaml.load(cfg)
+    try:
+        with open(args.config, 'r') as cfg:
+            config = yaml.load(cfg)
+    except FileNotFoundError:
+        print("Unable to find config file (%s). Pass correct path with -c" % args.config)
+        return 1
 
     log_file = config.get('log_file', None)
     log_level = config.get('log_level', None)
@@ -73,6 +77,7 @@ def action_run(args):
     pipeline = Pipeline()
     pipeline.build(config['pipeline'])
     pipeline.run()
+
 
 def action_version(args):
     "Show version/license info"

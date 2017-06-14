@@ -36,7 +36,7 @@ log_file: null
 
 # Construct a pipeline to handle logged data
 pipeline:
-  - sniffer:
+  - wifi_sniffer:
       name: 'main'
       interface: wlan0mon
       related_interface: null

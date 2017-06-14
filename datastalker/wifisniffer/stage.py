@@ -2,10 +2,10 @@
 # License: MIT
 
 from datastalker.pipeline import SourceStage, Pipeline
-from datastalker.sniffer import Sniffer, Hopper
+from datastalker.wifisniffer import Sniffer, Hopper
 
-@Pipeline.register_stage('sniffer')
-class SnifferStage(SourceStage):
+@Pipeline.register_stage('wifi_sniffer')
+class WifiSnifferStage(SourceStage):
     "Connect sniffer code to pipeline as a sourcestage"
 
     def __init__(self, sniffer):
@@ -42,5 +42,5 @@ class SnifferStage(SourceStage):
                           hopper,
                           sniffer_name=name)
 
-        stage = SnifferStage(sniffer)
+        stage = WifiSnifferStage(sniffer)
         return stage
