@@ -4,13 +4,13 @@
 # License: MIT
 
 """
-Entry point for WifiLogger tool.
+Entry point for DataStalker tool.
 """
 
 try:
-    from wflogger import main
+    from datastalker import main
 except ImportError:
-    print("Unable to find and import the `wflogger' module - make sure it's")
+    print("Unable to find and import the `datastalker' module - make sure it's")
     print("installed in your site-packages/dist-packages directories or available")
     print("at PYTHONPATH environment")
     print()

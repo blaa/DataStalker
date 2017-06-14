@@ -8,7 +8,7 @@ Basic stages which might be used in pipelines.
 from time import time
 from pprint import pprint
 
-from wflogger.pipeline import Stage, Pipeline
+from datastalker.pipeline import Stage, Pipeline
 
 import logging
 log = logging.getLogger()

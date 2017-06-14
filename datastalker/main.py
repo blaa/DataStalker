@@ -7,11 +7,11 @@ import logging
 
 import yaml
 
-from wflogger import version
-from wflogger.pipeline import Pipeline
+from datastalker import version
+from datastalker.pipeline import Pipeline
 
 # Register stages
-from wflogger import sniffer
+from datastalker import sniffer
 
 # Install faulthandler if it's available.
 try:
@@ -27,7 +27,7 @@ def _parse_arguments():
     "Parse command line arguments"
     import argparse
 
-    p = argparse.ArgumentParser(description='wifilogger')
+    p = argparse.ArgumentParser(description='DataStalker - gather, decorate and store metainformation from traffic')
     act = p.add_argument_group('actions')
 
     act.add_argument("--run", dest="run",
@@ -76,17 +76,17 @@ def action_run(args):
 
 def action_version(args):
     "Show version/license info"
-    from wflogger import version
+    from datastalker import version
     print((
-        "Wifi Logger / Wifistalker\n"
+        "DataStalker / WifiStalker-ng\n"
         "Curent version:   {0}\n"
         "Project author:   Tomasz bla Fortuna\n"
-        "Backend license:  wflogger - MIT; PythonWiFi LGPL\n"
+        "Backend license:  DataStalker - MIT; PythonWiFi LGPL\n"
     ).format(version.VERSION_STRING))
 
 
 def run():
-    "Run WFLogger"
+    "Run DataStalker"
     parser, args = _parse_arguments()
 
     if args.run:

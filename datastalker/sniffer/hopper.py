@@ -6,7 +6,7 @@ import sys
 from collections import defaultdict
 from time import time, sleep
 
-from wflogger import pythonwifi
+from datastalker import pythonwifi
 
 import logging
 log = logging.getLogger()

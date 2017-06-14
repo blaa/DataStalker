@@ -12,7 +12,7 @@ from scapy.modules import p0f
 
 from .fields import *
 
-from wflogger import utils
+from datastalker import utils
 
 import logging
 log = logging.getLogger()

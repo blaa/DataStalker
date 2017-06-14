@@ -1,7 +1,7 @@
 # (C) 2015 - 2017 by Tomasz bla Fortuna
 # License: MIT
 
-from wflogger.pipeline import SourceStage
+from datastalker.pipeline import SourceStage
 
 import logging
 log = logging.getLogger()
