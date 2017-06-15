@@ -15,7 +15,7 @@ class AutoIndex(object):
     def get_index(self, entry):
         "Get index name for given date"
         date = entry[self.time_field]
-        name = date.strftime(self.time_field)
+        name = date.strftime(self.index_format)
         return name
 
     def get_schema(self):

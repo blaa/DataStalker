@@ -13,7 +13,7 @@ class ElasticSearchStage(Stage):
 
     def handle(self, entry):
         print("ES Storing", entry)
-        self.db.store(db)
+        self.db.store(entry)
         return entry
 
     @classmethod

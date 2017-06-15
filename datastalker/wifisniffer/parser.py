@@ -29,67 +29,8 @@ class PacketParser:
 
         self._parse_dot11(data, p.payload)
 
-        # DEBUG, not finished
-        if p.haslayer('IP'):
-            self._parse_highlevel(data, p)
-
+        data['_pkt'] = p
         return data
-
-    def _parse_highlevel(self, data, p):
-
-        ip = p.getlayer('IP')
-        # Highlevel meta
-        try:
-            hl = {
-                'src': ip.src,
-                'dst': ip.dst,
-            }
-        except:
-            hl = {
-                'src': None,
-                'dst': None,
-            }
-            print("Exception")
-        data['hl'] = hl
-        data['tags'].add('IP')
-
-        tcp = ip.getlayer('TCP')
-        udp = ip.getlayer('UDP')
-        if tcp is not None:
-            ports = [tcp.sport, tcp.dport]
-            hl['sport'] = tcp.sport
-            hl['dport'] = tcp.dport
-
-            # Additional TCP
-            if hl['dport'] == 80:
-                # Parse start of HTTP header
-                if str(tcp.payload).startswith('GET') or str(tcp.payload).startswith('POST'):
-                    print("QUE", repr(tcp.payload))
-            if hl['sport'] == 80:
-                # Parse start of HTTP response
-                print("80", repr(tcp.payload))
-            if 443 in ports:
-                data['tags'].add('HTTPS')
-            if 80 in ports:
-                data['tags'].add('HTTP')
-        elif udp is not None:
-            ports = [udp.sport, udp.dport]
-            hl['sport'] = udp.sport
-            hl['dport'] = udp.dport
-
-            # TODO: Add DNS query harvesting
-            if 53 == udp.dport:
-                data['tags'].update(['DNS', 'DNS_REQ'])
-                print("DNS QUERY:", repr(ip))
-            if 53 == udp.sport:
-                data['tags'].update(['DNS', 'DNS_RESP'])
-
-            if 67 == udp.sport or 68 == udp.dport: # BOOTP Server
-                data['tags'].update(['BOOTP', 'BOOTP_SERVER'])
-            if 67 == udp.dport or 68 == udp.sport: # BOOTP Client
-                data['tags'].update(['BOOTP', 'BOOTP_CLIENT'])
-
-        print(hl)
 
 
     def _parse_dot11(self, data, p):
@@ -207,10 +148,17 @@ class PacketParser:
         if not hasattr(radiotap, 'addr2') or radiotap.addr2 is None:
             return None
 
+        tags = set()
+
+        # P2P: Addr1 is destination, Addr2 is source
+
+        # Through intermediate distribution system:
+        # Addr1 is ultimate destination,
+        # Addr2 is intermediate sender (AP sending to Addr1),
+        # Addr3 is intermediate destination (AP receiving from Addr4),
+        # and Addr4 is the original source
         mac_dst = radiotap.addr1
         mac_source = radiotap.addr2
-        mac_addr3 = radiotap.addr3
-        mac_addr4 = radiotap.addr4
 
         sig_str = radiotap.dbm_antsignal
         antenna = radiotap.antenna
@@ -219,13 +167,9 @@ class PacketParser:
         if sig_str < -120 or sig_str > 0:
             sig_str = None
 
-
         # Broadcast within some bssid - alter destination
         if mac_dst == 'ff:ff:ff:ff:ff:ff':
-            broadcast = True
-        else:
-            broadcast = False
-
+            tags.add('BROADCAST')
 
         time = datetime.datetime.fromtimestamp(p.time)
         time = utils.localize(time)
@@ -235,20 +179,22 @@ class PacketParser:
         data = {
             # UTC datetime
             '@timestamp': time.astimezone(tz=utils.UTC),
-            # Local unmodified timestamp.
-            'timestamp_local': p.time,
+
             'src': mac_source,
             'dst': mac_dst,
+
+            'addr1': radiotap.addr1,
+            'addr2': radiotap.addr2,
+            'addr3': radiotap.addr3,
+            'addr4': radiotap.addr4,
 
             'strength': sig_str,
             'freq': freq,
             'antenna': antenna,
 
-            'broadcast': broadcast,
-
             # Defaults for dot11 parsing
             'ssid': None,
             'channel': None,
-            'tags': set(),
+            'tags': tags,
         }
         return data

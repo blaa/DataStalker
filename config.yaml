@@ -8,7 +8,7 @@ log_file: null
 pipeline:
   - wifi_sniffer:
       name: 'main'
-      interface: wlan0mon
+      interface: wlan1mon
       related_interface: null
 
       # Enable hopping:
@@ -22,8 +22,6 @@ pipeline:
         ]
         hop_tries: 10
 
-  - print
-
   - limit:
       seconds: 10
       entries: 1
@@ -33,6 +31,14 @@ pipeline:
   #    max_str_deviation: 5
   #    max_time_between: 120
 
+  - strip:
+      # Remove all keys which starts with '_'
+      keys_startswith: '_'
+      # Remove keys by name:
+      # keys: ['key1', 'key2', ...]
+
+  - print:
+
   - elasticsearch:
       hosts: ['127.0.0.1:9200']
 
@@ -40,4 +46,15 @@ pipeline:
       index_template: 'ds-%Y%m%d'
       doc_type: 'frames'
 
-      mapping: {}
+      mapping:
+        # By default there's internal default mapping defined.
+        # _use_default_mapping: false
+
+        # Can define with shortcut:
+        # str, str_analyzed, str_not_analyzed
+        # integer, date, double, boolean, geo
+        new_key: 'str_analyzed'
+        # Or in ES API format
+        some_key:
+          type: 'string'
+          index: 'analyzed'

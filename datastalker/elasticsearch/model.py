@@ -14,15 +14,14 @@ class ElasticStorage(AutoIndex):
                  mapping):
 
         # Init auto index
-        super(ElasticStorage).__init__(time_field,
-                                       index_format)
+        super(ElasticStorage, self).__init__(time_field,
+                                             index_format)
 
         self.doc_type = doc_type
         self.mapping = mapping
 
         # Connection object
         self.es = Elasticsearch(connections)
-
 
     def store(self, frame):
         "Add frame to the database"
@@ -31,25 +30,41 @@ class ElasticStorage(AutoIndex):
             idx_name = self.get_index(frame)
             self.create_index(idx_name)
 
-            if self.beacon_filter.filter(frame):
-                ret = self.es.index(index=idx_name,
-                                    doc_type=self.doc_type,
-                                    body=frame)
-                print("RET ", ret)
+            ret = self.es.index(index=idx_name,
+                                doc_type=self.doc_type,
+                                body=frame)
+
+            print("RET ", ret)
         except:
-            print "Frame storage failed on:"
-            print repr(frame)
+            print("Frame storage failed on:")
+            print(repr(frame))
             raise
+
 
     schema_parts = {
         'str_analyzed': { "type": "string", "index": "analyzed" },
         'str_not_analyzed': { "type": "string", "index": "not_analyzed" },
-        # TODO: Add .raw
-        'str': { "type": "string", "index": "not_analyzed" },
-
+        'str': {
+            "type": "string",
+            "index": "analyzed",
+            "fields": {
+                "keyword": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                },
+            }
+        },
+        'integer': { "type": "integer" },
+        'date': { "type": "date" },
+        'double': { "type": "double" },
+        'boolean': { "type": "boolean" },
+        'geo': { "type": "geo_point" },
     }
 
     def get_schema(self):
+        "Get the correct schema for the ES"
+        sp = self.schema_parts
+
         settings = {
             'number_of_shards': 1,
             'index.codec': 'best_compression',
@@ -57,52 +72,54 @@ class ElasticStorage(AutoIndex):
 
         properties = {
             # Date in UTC for Kibana
-            "@timestamp": { "type": "date" },
-            "dst": { "type": "string", "index": "not_analyzed" },
-            "src": { "type": "string", "index": "not_analyzed" },
+            "@timestamp": sp['date'],
+            "dst": sp['str_not_analyzed'],
+            "src": sp['str_not_analyzed'],
 
-            "channel": {
-                "type": "integer",
-            },
+            # Network card producer
+            "dst_oui": sp['str_not_analyzed'],
+            "src_oui": sp['str_not_analyzed'],
 
-            "freq": {
-                "type": "integer",
-            },
 
-            "strength": {
-                "type": "double",
-            },
+            # Channel and frequency of the received packet
+            "channel": sp['integer'],
+            "freq": sp['integer'],
 
-            "broadcast": {
-                "type": "boolean",
-            },
+            # Channel the hopper was configured for when the packet was received.
+            # (because the 2.4GHz 802.11 channels overlap)
+            "channel_hopper": sp['integer'],
 
-            # Generic tags mechanisms
-            "tags": {
-                "type": "string",
-                "index": "not_analyzed",
-            },
+            "strength": sp['double'],
 
-            "label": {
-                "type": "string",
-                "index": "not_analyzed",
-            },
-                
-            "hl_sport": {"type": "integer" },
-            "hl_dport": {"type": "integer" },
-            "hl_src": {"type": "string", "index": "not_analyzed" },
-            "hl_dst": {"type": "string", "index": "not_analyzed" },
-            "hl_dns": {"type": "string", "index": "not_analyzed" },
+            # Generic tags mechanisms for boolean operators
+            "tags": sp['str_not_analyzed'],
 
-            "ssid": {
-                "type": "string",
-                "index": "not_analyzed",
-                },
+            # High level protocol data
+            "hl_sport": sp['integer'],
+            "hl_dport": sp['integer'],
+            "hl_src": sp['str_not_analyzed'],
+            "hl_dst": sp['str_not_analyzed'],
+            "hl_dns": sp['str_not_analyzed'],
 
-                # Location
-            "location": { "type": "geo_point" },
+            "ssid": sp['str'],
+
+            # Location
+            "location": sp['geo'],
         }
 
+        # Allow user to drop default mapping
+        use_default_mapping = self.mapping.get('_use_default_mapping', True)
+        if use_default_mapping is False:
+            properties = {}
+
+        for key, key_map in self.mapping.items():
+            if isinstance(key_map, str):
+                if key_map not in sp:
+                    raise Exception("Unknown mapping for elasticsearch: %s" % key_map)
+                key_map = sp[key_map]
+            properties[key] = key_map
+
+        # Combine into ES api
         schema = {
             'settings': settings,
             'mappings': {
@@ -111,3 +128,5 @@ class ElasticStorage(AutoIndex):
                 }
             }
         }
+
+        return schema

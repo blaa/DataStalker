@@ -17,8 +17,8 @@ log = logging.getLogger()
 class Sniffer(object):
     "Channel hopping, packet sniffing, parsing and finally storing"
 
-    def __init__(self, interface, related_interface, hopper,
-                 sniffer_name):
+    def __init__(self, interface, related_interface,
+                 hopper, sniffer_name):
 
         self.hopper = hopper
         self.sniffer_name = sniffer_name
@@ -26,19 +26,16 @@ class Sniffer(object):
 
         # Check interface existance
         if not self._iface_exists(interface):
-            print("Exiting: Interface %s doesn't exist" % interface)
-            sys.exit(1)
+            raise Exception("Interface %s doesn't exist" % interface)
 
         if related_interface and not self._iface_exists(related_interface):
-            print("Exiting: Related interface %s doesn't exist" % interface)
-            sys.exit(1)
+            raise Exception("Exiting: Related interface %s doesn't exist" % interface)
 
         # Submodules
         self.packet_parser = PacketParser()
 
         config.conf.sniff_promisc = 0
-        log.info("Promiscuous mode disabled")
-
+        log.info("Promiscuous mode disabled in Scapy")
 
     def _iface_exists(self, iface_name):
         "Check if interface exists"
@@ -96,8 +93,8 @@ class Sniffer(object):
                 yield data
 
             # Show stats
+            now = time()
             if stat_prev + stat_every < now:
-                now = time()
                 took = time() - sniff_begin
                 s = "STAT: pkts=%d t_total=%.2fs pps=%.2f"
                 s %= (pkts_all, took, pkts_all / took)

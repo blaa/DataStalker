@@ -26,6 +26,33 @@ class PrintStage(Stage):
         return stage
 
 
+@Pipeline.register_stage('strip')
+class StripStage(Stage):
+    """Remove keys matching configured scheme"""
+    def __init__(self, keys_startswith, keys):
+        self.keys_startswith = keys_startswith
+        self.keys = keys
+
+    def handle(self, entry):
+        ks = self.keys_startswith
+        for k in list(entry.keys()):
+            if ks is not None and k.startswith(ks):
+                del entry[k]
+
+        for key in self.keys:
+            if key in entry:
+                del entry[key]
+        return entry
+
+    @classmethod
+    def from_config(cls, config):
+        keys_startswith = config.get('keys_startswith', None)
+        keys = config.get('keys', [])
+
+        stage = StripStage(keys_startswith, keys)
+        return stage
+
+
 @Pipeline.register_stage('limit')
 class LimitStage(Stage):
     """Stop pipeline when the limit is reached"""
