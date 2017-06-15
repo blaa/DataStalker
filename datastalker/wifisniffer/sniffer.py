@@ -11,8 +11,7 @@ from scapy import config, sendrecv
 from .hopper import Hopper
 from .parser import PacketParser
 
-import logging
-log = logging.getLogger()
+from . import log
 
 class Sniffer(object):
     "Channel hopping, packet sniffing, parsing and finally storing"

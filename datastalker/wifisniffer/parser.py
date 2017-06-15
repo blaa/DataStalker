@@ -14,9 +14,7 @@ from .fields import *
 
 from datastalker import utils
 
-import logging
-log = logging.getLogger()
-
+from . import log
 
 class PacketParser:
     "Helper class used to parse incoming packets"

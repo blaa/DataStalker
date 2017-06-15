@@ -9,7 +9,7 @@ from time import time, sleep
 from datastalker import pythonwifi
 
 import logging
-log = logging.getLogger()
+log = logging.getLogger('root.hopper')
 
 class Hopper(object):
     """

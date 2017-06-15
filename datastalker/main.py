@@ -4,6 +4,7 @@
 import sys
 import os
 import logging
+import logging.config
 import argparse
 
 import yaml
@@ -71,9 +72,18 @@ def action_run(args):
     logging.basicConfig(filename=log_file,
                         level=log_level)
 
+
+    # Configure logging
+    logging_config = config.get('logging', None)
+    if logging_config is not None:
+        logging.config.dictConfig(logging_config)
+
     if 'pipeline' not in config:
         print("Config file doesn't define a pipeline")
         return 1
+
+    loggers = ", ".join(logging.Logger.manager.loggerDict.keys())
+    logging.info('Registered loggers: ' + loggers)
 
     pipeline = Pipeline()
     pipeline.build(config['pipeline'])

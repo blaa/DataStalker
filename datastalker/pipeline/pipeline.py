@@ -3,8 +3,7 @@
 
 from datastalker.pipeline import SourceStage
 
-import logging
-log = logging.getLogger()
+from . import log
 
 class Pipeline:
     """

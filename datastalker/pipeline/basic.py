@@ -10,8 +10,7 @@ from pprint import pprint
 
 from datastalker.pipeline import Stage, Pipeline
 
-import logging
-log = logging.getLogger()
+from . import log
 
 @Pipeline.register_stage('print')
 class PrintStage(Stage):

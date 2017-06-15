@@ -1,9 +1,5 @@
 ---
 
-# Logging definition
-log_level: DEBUG
-log_file: null
-
 # Construct a pipeline to handle logged data
 pipeline:
   - wifi_sniffer:
@@ -58,3 +54,23 @@ pipeline:
         some_key:
           type: 'string'
           index: 'analyzed'
+
+
+
+# Logging configuration
+logging:
+  version: 1
+  loggers:
+    root:
+      level: DEBUG
+    elasticsearch:
+      level: WARNING
+    scapy:
+      level: INFO
+    # etc.
+    #root.hopper:
+    #  level: WARNING
+    #root.wifisniffer:
+    #  level: WARNING
+    #root.pipeline:
+    #  level: WARNING
