@@ -34,7 +34,9 @@ class ElasticStorage(AutoIndex):
                                 doc_type=self.doc_type,
                                 body=frame)
 
-            print("RET ", ret)
+            if ret['created'] != True:
+                log.error('Error while creating entries in Elasticsearch')
+                raise Exception('Elasticsearch storage error: %r' % ret)
         except:
             print("Frame storage failed on:")
             print(repr(frame))

@@ -18,9 +18,9 @@ pipeline:
         ]
         hop_tries: 10
 
-  - limit:
-      seconds: 10
-      entries: 1
+  #- limit:
+  #    seconds: 10
+  #    entries: 1
 
   #- beacon_filter:
   #    cleanup_interval: 600
@@ -29,6 +29,7 @@ pipeline:
 
   - strip:
       # Remove all keys which starts with '_'
+      # for example raw packet data stored by sniffer.
       keys_startswith: '_'
       # Remove keys by name:
       # keys: ['key1', 'key2', ...]
@@ -38,7 +39,7 @@ pipeline:
   - elasticsearch:
       hosts: ['127.0.0.1:9200']
 
-      time_field: '@timestamp'
+      time_field: 'timestamp'
       index_template: 'ds-%Y%m%d'
       doc_type: 'frames'
 
@@ -54,7 +55,6 @@ pipeline:
         some_key:
           type: 'string'
           index: 'analyzed'
-
 
 
 # Logging configuration

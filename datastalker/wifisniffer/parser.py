@@ -67,9 +67,6 @@ class PacketParser:
         if tag:
             tags.add(tag)
 
-        #print "PARSE type=%d subtype=%d %r" % (d_type, d_subtype, repr(p)[:100])
-        #print "  ", tags
-        #print "  ", repr(p)
 
         found_vendor = False
 
@@ -82,8 +79,8 @@ class PacketParser:
                 ssid = p.info
                 assert p.len == len(ssid)
                 if data['ssid'] != None:
-                    log.info("SSID wasn't None before setting new value ({0} - {1})" % (data['ssid'],
-                                                                                             repr(ssid)))
+                    log.warning("SSID wasn't None before setting new value ({0} - {1})" % (data['ssid'],
+                                                                                           repr(ssid)))
                 data['ssid'] = self._sanitize(ssid)
                 continue
 
@@ -113,6 +110,7 @@ class PacketParser:
                     continue
                 if data['channel'] is None:
                     data['channel'] = ord(p.info)
+                    # TODO: How about 5ghz?
                     if data['channel'] < 0 or data['channel'] > 13:
                         msg = 'Ignoring invalid channel value for type/subtype %d/%d' % (d_type, d_subtype)
                         log.warning(msg)
@@ -144,6 +142,7 @@ class PacketParser:
 
         # If no source MAC - ignore packet
         if not hasattr(radiotap, 'addr2') or radiotap.addr2 is None:
+            log.warning('Dropping packet with null addr2')
             return None
 
         tags = set()
@@ -176,7 +175,7 @@ class PacketParser:
         # Basic data
         data = {
             # UTC datetime
-            '@timestamp': time.astimezone(tz=utils.UTC),
+            'timestamp': time.astimezone(tz=utils.UTC),
 
             'src': mac_source,
             'dst': mac_dst,

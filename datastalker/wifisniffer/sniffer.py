@@ -103,7 +103,7 @@ class Sniffer(object):
                            took/(self.hopper.swipes_total + 0.001),
                            self.hopper.channel_number)
                     s += s2
-                print(s)
+                log.info(s)
 
                 stat_prev = now
 
@@ -111,6 +111,6 @@ class Sniffer(object):
             if self.hopper is not None:
                 ret = self.hopper.karmic_hop()
                 if ret is False:
-                    print("Stopping sniffer - unable to hop")
+                    log.error("Stopping sniffer - unable to hop")
                     break
 

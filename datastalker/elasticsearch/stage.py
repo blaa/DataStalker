@@ -12,7 +12,6 @@ class ElasticSearchStage(Stage):
         self.db = db
 
     def handle(self, entry):
-        print("ES Storing", entry)
         self.db.store(entry)
         return entry
 
