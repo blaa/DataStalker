@@ -20,7 +20,7 @@ class PrintStage(Stage):
         return entry
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config, stats):
         stage = PrintStage()
         return stage
 
@@ -28,27 +28,30 @@ class PrintStage(Stage):
 @Pipeline.register_stage('strip')
 class StripStage(Stage):
     """Remove keys matching configured scheme"""
-    def __init__(self, keys_startswith, keys):
+    def __init__(self, keys_startswith, keys, stats):
         self.keys_startswith = keys_startswith
         self.keys = keys
+        self.stats = stats
 
     def handle(self, entry):
         ks = self.keys_startswith
         for k in list(entry.keys()):
             if ks is not None and k.startswith(ks):
                 del entry[k]
+                self.stats.incr('stripstage/stripped_by_prefix')
 
         for key in self.keys:
             if key in entry:
                 del entry[key]
+                self.stats.incr('stripstage/stripped_by_name')
         return entry
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config, stats):
         keys_startswith = config.get('keys_startswith', None)
         keys = config.get('keys', [])
 
-        stage = StripStage(keys_startswith, keys)
+        stage = StripStage(keys_startswith, keys, stats)
         return stage
 
 
@@ -75,7 +78,7 @@ class LimitStage(Stage):
         return entry
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config, stats):
         "Build limitstage"
         seconds = config.get('seconds', None)
         entries = config.get('entries', None)

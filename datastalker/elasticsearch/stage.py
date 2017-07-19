@@ -8,15 +8,17 @@ from datastalker.elasticsearch import model
 class ElasticSearchStage(Stage):
     "Connect sniffer code to pipeline as a sourcestage"
 
-    def __init__(self, db):
+    def __init__(self, db, stats):
         self.db = db
+        self.stats = stats
 
     def handle(self, entry):
         self.db.store(entry)
+        self.stats.incr('elasticsearch/stored')
         return entry
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config, stats):
         "Create sniffer with injected hopper from YAML configuration"
 
         hosts = config.get('hosts', ['127.0.0.1:9200'])
@@ -32,5 +34,5 @@ class ElasticSearchStage(Stage):
                                   doc_type,
                                   mapping)
 
-        stage = ElasticSearchStage(db)
+        stage = ElasticSearchStage(db, stats)
         return stage

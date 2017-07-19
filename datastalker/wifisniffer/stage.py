@@ -15,7 +15,7 @@ class WifiSnifferStage(SourceStage):
         yield from self.sniffer.run()
 
     @classmethod
-    def from_config(cls, config):
+    def from_config(cls, config, stats):
         "Create sniffer with injected hopper from YAML configuration"
 
         name = config.get('name', 'default')
@@ -30,7 +30,7 @@ class WifiSnifferStage(SourceStage):
             hop_tries = hopper_cfg.get('hop_tries', 10)
 
             # Create hopper
-            hopper = Hopper(interface, related_interface,
+            hopper = Hopper(interface, related_interface, stats,
                             hop_tries=hop_tries)
             hopper.configure(channels, max_karma)
         else:
@@ -40,6 +40,7 @@ class WifiSnifferStage(SourceStage):
         sniffer = Sniffer(interface,
                           related_interface,
                           hopper,
+                          stats,
                           sniffer_name=name)
 
         stage = WifiSnifferStage(sniffer)

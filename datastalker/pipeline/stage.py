@@ -10,6 +10,10 @@ class Stage:
     """
     Stage which reads data from previous stage and yields new data
     """
+
+    # Created by registering decorator
+    log = None
+
     def handle(self, data):
         "Handle incoming data and return result"
         raise NotImplementedError
@@ -24,6 +28,10 @@ class SourceStage:
     """
     Stage which starts the pipeline
     """
+
+    # Created by registering decorator
+    log = None
+
     def run(self):
         "Yield incoming data"
         raise NotImplementedError

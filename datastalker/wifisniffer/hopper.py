@@ -16,9 +16,10 @@ class Hopper(object):
     Handle all logic regarding channel hopping.
     """
     def __init__(self, base_interface, related_interface,
-                 hop_tries=10):
+                 stats, hop_tries=10):
         self.base_interface = base_interface
         self.related_interface = related_interface
+        self.stats = stats
 
         self.wifi = None
         self.reset_interface()
@@ -80,7 +81,6 @@ class Hopper(object):
             print("ERROR: No channels selected for hopping")
             return False
 
-        self.hop_failures = defaultdict(lambda: 0)
         self.hop_total = 0
         self.swipes_total = 0
 
@@ -100,7 +100,10 @@ class Hopper(object):
             return
 
         if self.channel_inc > self.max_karma:
+            self.stats.incr('hopper/karmic/saturated')
             return
+
+        self.stats.incr('hopper/karmic/inc')
         self.channel_karma += 1
         self.channel_inc += 1
 
@@ -110,6 +113,8 @@ class Hopper(object):
         self.channel_inc = 0
 
         start = time()
+
+        self.stats.incr('hopper/hops')
 
         # Increment channel
         self.channel_idx = (self.channel_idx + 1) % self.channel_cnt
@@ -121,6 +126,8 @@ class Hopper(object):
             took = time() - self.channel_swipe_start
             self.swipes_total += 1
             self.channel_swipe_start = time()
+            self.stats.incr('hopper/swipe/total')
+            self.stats.incr('hopper/swipe/total_time', took)
 
         # Tries must fit within watchdog limit.
         last_exc = None
@@ -133,11 +140,12 @@ class Hopper(object):
                 s = 'Try {0}/{1}: Channel hopping failed (f={1} ch={2})'
                 log.info(s.format(i+1, self.tries,
                          freq, self.channel_number))
-                self.hop_failures[self.channel_number] += 1
                 self.reset_interface()
+                self.stats.incr('hopper/fail/soft')
                 sleep(0.8)
                 last_exc = e
 
+        self.stats.incr('hopper/fail/hard')
 
         log.info('Failure after %d failed hopping tries' % i)
         if self.related_interface is None:
@@ -155,6 +163,8 @@ class Hopper(object):
             print(s.format(self.channel_karma,
                            self.channel_inc,
                            self.channel_number))
+            self.stats.incr('hopper/karmic/stay')
             return True
 
+        self.stats.incr('hopper/karmic/hop')
         return self.hop()

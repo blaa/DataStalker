@@ -17,11 +17,12 @@ class Sniffer(object):
     "Channel hopping, packet sniffing, parsing and finally storing"
 
     def __init__(self, interface, related_interface,
-                 hopper, sniffer_name):
+                 hopper, stats, sniffer_name):
 
         self.hopper = hopper
         self.sniffer_name = sniffer_name
         self.interface = interface
+        self.stats = stats
 
         # Check interface existance
         if not self._iface_exists(interface):
@@ -89,6 +90,8 @@ class Sniffer(object):
 
                 # Lists are serializable, sets no - convert.
                 data['tags'] = list(data['tags'])
+
+                self.stats.incr('wifisniffer/frames')
                 yield data
 
             # Show stats

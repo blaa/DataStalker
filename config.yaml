@@ -34,6 +34,14 @@ pipeline:
       # Remove keys by name:
       # keys: ['key1', 'key2', ...]
 
+  - oui:
+      db_path: 'misc/oui.txt'
+      fields:
+        - 'src'
+        - 'dst'
+      # Decoded name in "src_oui"
+      suffix: '_oui'
+
   - print:
 
   - elasticsearch:

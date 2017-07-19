@@ -1,9 +1,12 @@
 # (C) 2015 - 2017 by Tomasz bla Fortuna
 # License: MIT
 
+import logging
+
 from datastalker.pipeline import SourceStage
 
 from . import log
+from .stats import Stats
 
 class Pipeline:
     """
@@ -16,11 +19,12 @@ class Pipeline:
 
     def __init__(self):
         self._stages = []
+        self.stats = Stats()
 
     def build(self, configuration):
         "Build pipeline using given configuration"
         builder = PipelineBuilder()
-        self._stages = builder.build(configuration)
+        self._stages = builder.build(configuration, self.stats)
 
     def run(self):
         "Run pipeline"
@@ -40,7 +44,7 @@ class Pipeline:
             log.info("Pipeline stopped on software request: %s", e.args[0])
         except KeyboardInterrupt:
             log.info("Pipeline stopped on keyboard request")
-
+        self.stats.dump()
 
     @staticmethod
     def register_stage(name):
@@ -49,6 +53,7 @@ class Pipeline:
             if name in PipelineBuilder._registered:
                 raise Exception("Stage with that name already defined")
             PipelineBuilder._registered[name] = stage_cls
+            stage_cls.log = logging.getLogger('root.stage.' + name)
             return stage_cls
         return decorator
 
@@ -63,7 +68,7 @@ class PipelineBuilder:
     # Registered stages: {stagename: stage class, ...}
     _registered = {}
 
-    def build(self, configuration):
+    def build(self, configuration, stats):
         "Build pipeline using given configuration"
         pipeline = []
         for stage_def in configuration:
@@ -78,7 +83,11 @@ class PipelineBuilder:
             if stage_cls is None:
                 raise Exception("Stage name '{}' is not defined".format(stage_name))
 
-            stage = stage_cls.from_config(stage_config)
+            try:
+                stage = stage_cls.from_config(stage_config, stats)
+            except:
+                log.error('Error while building stage: %s', stage_name)
+                raise
             pipeline.append(stage)
 
         if len(pipeline) < 1:
