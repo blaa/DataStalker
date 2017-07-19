@@ -2,6 +2,7 @@
 # License: MIT
 
 import logging
+from time import time
 
 from datastalker.pipeline import SourceStage
 
@@ -32,18 +33,28 @@ class Pipeline:
         operations = self._stages[1:]
 
         log.warning('Entering pipeline')
+        pipeline_start = time()
         try:
             for entry in source.run():
+                start = time()
                 for stage in operations:
                     entry = stage.handle(entry)
 
                     if entry is None:
                         # Stop iteration of this entry
                         break
+
+                took = time() - start
+                self.stats.incr('pipeline/entries')
+                self.stats.incr('pipeline/stages_total_s', took)
+
         except Pipeline.StopPipeline as e:
             log.info("Pipeline stopped on software request: %s", e.args[0])
         except KeyboardInterrupt:
             log.info("Pipeline stopped on keyboard request")
+
+        took = time() - pipeline_start
+        self.stats.incr('pipeline/total_s', took)
         self.stats.dump()
 
     @staticmethod
