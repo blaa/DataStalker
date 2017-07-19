@@ -15,7 +15,7 @@ from datastalker.pipeline import Pipeline
 # Register stages
 from datastalker import wifisniffer
 from datastalker import elasticsearch
-from datastalker import net_parsers
+from datastalker import stages
 
 # Install faulthandler if it's available.
 try:

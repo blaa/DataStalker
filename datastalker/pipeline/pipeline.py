@@ -45,6 +45,11 @@ class Pipeline:
                         self.stats.incr('pipeline/dropped')
                         break
 
+                    if not isinstance(entry, dict):
+                        log.error("Stage %s returned invalid entry type: %s",
+                                  stage, type(entry))
+                        raise Pipeline.StopPipeline("Pipeline Error")
+
                 took = time() - start
                 self.stats.incr('pipeline/entries')
                 self.stats.incr('pipeline/stages_total_s', took)
