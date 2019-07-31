@@ -56,10 +56,16 @@ class OuiStage(Stage):
         for field_name, new_field_name in self.fields:
             if field_name in entry:
                 mac = entry[field_name][:8]
-                value = self.db.get(mac, 'unknown')
+                value = self.db.get(mac, None)
+                if value is None:
+                    value = 'unknown'
+                    self.stats.incr('oui/entries/unknown')
+                else:
+                    self.stats.incr('oui/entries/known')
                 entry[new_field_name] = value
-                self.stats.incr('oui/entries/decoded')
-
+            else:
+                self.stats.incr('oui/entries/missing_field')
+        return entry
 
     @classmethod
     def from_config(cls, config, stats):

@@ -42,6 +42,7 @@ class Pipeline:
 
                     if entry is None:
                         # Stop iteration of this entry
+                        self.stats.incr('pipeline/dropped')
                         break
 
                 took = time() - start
