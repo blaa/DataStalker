@@ -51,7 +51,6 @@ pipeline:
 
       time_field: 'timestamp'
       index_template: 'ds-%Y%m%d'
-      doc_type: 'frames'
 
       mapping:
         # By default there's internal default mapping defined.
@@ -63,8 +62,7 @@ pipeline:
         new_key: 'str_analyzed'
         # Or in ES API format
         some_key:
-          type: 'string'
-          index: 'analyzed'
+          type: 'text'
 
 
 # Logging configuration

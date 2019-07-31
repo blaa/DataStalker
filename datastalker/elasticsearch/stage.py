@@ -3,6 +3,7 @@
 
 from datastalker.pipeline import Stage, Pipeline
 from datastalker.elasticsearch import model
+from . import log
 
 @Pipeline.register_stage('elasticsearch')
 class ElasticSearchStage(Stage):
@@ -26,13 +27,12 @@ class ElasticSearchStage(Stage):
         mapping = config.get('mapping', {})
         index_template = config.get('index_template')
         time_field = config.get('time_field')
-        doc_type = config.get('doc_type', 'doc')
 
         db = model.ElasticStorage(hosts,
                                   index_template,
                                   time_field,
-                                  doc_type,
                                   mapping)
 
         stage = ElasticSearchStage(db, stats)
+        log.info("Elasticsearch stage initialized")
         return stage
