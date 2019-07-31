@@ -1,6 +1,6 @@
-ipython==6.1.0
-scapy-python3==0.21
-tzlocal==1.4
-pytz==2017.2
-elasticsearch==5.4.0
-PyYAML==3.12
+ipython==7.7.0
+scapy==2.4.2
+tzlocal==2.0.0
+pytz==2019.1
+elasticsearch==7.0.2
+PyYAML==5.1.1

@@ -4,7 +4,7 @@ if [ -f "ENV" ]; then
     echo "Virtualenv exists already - to refresh delete it manually"
     sleep 2
 else
-    pyvenv ENV
+    python3 -m venv ENV
 fi
 
 . ./ENV/bin/activate

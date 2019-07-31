@@ -1,5 +1,7 @@
 ---
 
+# Template for config file showcasing most of the features.
+
 # Construct a pipeline to handle logged data
 pipeline:
   - wifi_sniffer:
