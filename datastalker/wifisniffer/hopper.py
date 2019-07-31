@@ -1,4 +1,4 @@
-# (C) 2015 - 2017 by Tomasz bla Fortuna
+# (C) 2015 - 2019 by Tomasz bla Fortuna
 # License: MIT
 
 import os
@@ -147,9 +147,9 @@ class Hopper(object):
 
         self.stats.incr('hopper/fail/hard')
 
-        log.info('Failure after %d failed hopping tries' % i)
+        log.info('Failure after %d failed hopping tries', i)
         if self.related_interface is None:
-            log.info('Try setting related interface')
+            log.info('Try setting related interface or putting interface UP')
 
         raise last_exc
         return False

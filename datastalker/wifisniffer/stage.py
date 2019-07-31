@@ -1,4 +1,4 @@
-# (C) 2015 - 2017 by Tomasz bla Fortuna
+# (C) 2015 - 2019 by Tomasz bla Fortuna
 # License: MIT
 
 from datastalker.pipeline import SourceStage, Pipeline

@@ -1,4 +1,4 @@
-# (C) 2015 - 2017 by Tomasz bla Fortuna
+# (C) 2015 - 2019 by Tomasz bla Fortuna
 # License: MIT
 
 import struct
@@ -6,7 +6,7 @@ from time import time
 import datetime
 
 from scapy.layers.dot11 import Dot11Beacon
-from scapy.layers.dot11 import Dot11WEP, Dot11Elt, Dot11
+from scapy.layers.dot11 import Dot11WEP, Dot11Elt, Dot11FCS
 from scapy.layers.dot11 import Dot11ProbeReq, Dot11ProbeResp, Dot11Deauth, Dot11Auth
 from scapy.modules import p0f
 
@@ -36,7 +36,8 @@ class PacketParser:
         tags = data['tags']
 
         # http://www.wildpackets.com/resources/compendium/wireless_lan/wlan_packet_types
-        dot11 = p.getlayer(Dot11)
+        dot11 = p.getlayer(Dot11FCS)
+
         d_type = dot11.type
         d_subtype = dot11.subtype
 
@@ -157,9 +158,9 @@ class PacketParser:
         mac_dst = radiotap.addr1
         mac_source = radiotap.addr2
 
-        sig_str = radiotap.dbm_antsignal
-        antenna = radiotap.antenna
-        freq = radiotap.channel_freq
+        sig_str = radiotap.dBm_AntSignal
+        antenna = radiotap.Antenna
+        freq = radiotap.Channel
 
         if sig_str < -120 or sig_str > 0:
             sig_str = None

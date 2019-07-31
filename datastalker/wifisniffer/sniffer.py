@@ -29,7 +29,7 @@ class Sniffer(object):
             raise Exception("Interface %s doesn't exist" % interface)
 
         if related_interface and not self._iface_exists(related_interface):
-            raise Exception("Exiting: Related interface %s doesn't exist" % interface)
+            raise Exception("Exiting: Related interface %s doesn't exist" % related_interface)
 
         # Submodules
         self.packet_parser = PacketParser()
