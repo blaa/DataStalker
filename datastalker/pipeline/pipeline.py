@@ -45,7 +45,7 @@ class Pipeline:
                         self.stats.incr('pipeline/dropped')
                         break
 
-                    if not isinstance(entry, dict):
+                    if not isinstance(entry, dict) and not isinstance(entry, list):
                         log.error("Stage %s returned invalid entry type: %s",
                                   stage, type(entry))
                         raise Pipeline.StopPipeline("Pipeline Error")

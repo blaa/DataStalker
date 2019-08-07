@@ -143,7 +143,7 @@ class PacketParser:
 
         # If no source MAC - ignore packet
         if not hasattr(radiotap, 'addr2') or radiotap.addr2 is None:
-            log.warning('Dropping packet with null addr2')
+            log.info('Dropping packet with null addr2')
             return None
 
         tags = set()

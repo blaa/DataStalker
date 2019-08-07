@@ -13,7 +13,7 @@ from .parser import PacketParser
 
 from . import log
 
-class Sniffer(object):
+class Sniffer:
     "Channel hopping, packet sniffing, parsing and finally storing"
 
     def __init__(self, interface, related_interface,
@@ -63,7 +63,7 @@ class Sniffer(object):
         while True:
             start = time()
 
-            # This catches KeyboardInterrupt,
+            # NOTE: This catches KeyboardInterrupt,
             # TODO: Disable this catching + Probably hop on another
             # thread and use prn argument.
             pkts = sendrecv.sniff(iface=self.interface, count=20, timeout=0.1)

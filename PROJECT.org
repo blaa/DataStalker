@@ -1,0 +1,40 @@
+#+TITLE: Project notes
+
+Project notes in org-mode format.
+
+* A-level tasks
+** TODO Stateful event aggregator
+*** Events:
+**** TODO New transmitter appears 
+**** TODO Transmitter disappears (hysteresis)
+**** TODO Transmitter is still active (periodical)
+
+*** TODO Cheap event storage (ES-less for low-powered rpi)
+    - I need a cheap perimeter monitoring (alarm like).
+
+* B-level tasks
+** TODO Initial state should return an object, not a dict.
+   This object should gather information about the schema and have an API
+   required by Elasticsearch to store the data.
+
+** TODO Split packet parser and sniffer
+   This is complicated by karmic hopper which needs some data on the sniffed
+   packets.
+
+   Pipelines could have an interface for passing messages "up" the pipeline.
+
+** TODO PCAP source and test case based on this.
+
+** TODO Separate sniffing thread with prn?
+   Infinite loop with limit on packet count + time looks hacky.
+
+** TODO Parallelization stage.
+   Split data on hash into multiple parallel workers.
+
+   - This might need a named pipelines idea (multiple named pipelines),
+     single stage could redirect a message into a named pipeline
+
+* C-level tasks
+** Bluetooth source
+** Simple ethernet, non-802.11, traffic metadata
+** Migrate to my Config class from OrgAssist to early show config errors

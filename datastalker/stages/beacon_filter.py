@@ -6,6 +6,7 @@ from datastalker.pipeline import Stage, Pipeline
 
 CacheEntry = namedtuple('CacheEntry', 'timestamp, strength')
 
+
 @Pipeline.register_stage('beacon_filter')
 class BeaconFilterStage(Stage):
     """Remove redundant information about beacons from pipeline.
@@ -14,12 +15,12 @@ class BeaconFilterStage(Stage):
     stationary APs with similar strength.
     """
     def __init__(self, stats, cleanup_interval,
-                 max_strength_deviation, max_time_between,
+                 max_strength_deviation, min_time_between,
                  timestamp_field, strength_field):
 
         self.cleanup_interval = cleanup_interval
         self.max_strength_deviation = max_strength_deviation
-        self.max_time_between = max_time_between
+        self.min_time_between = min_time_between
         self.timestamp_field = timestamp_field
         self.strength_field = strength_field
 
@@ -33,19 +34,23 @@ class BeaconFilterStage(Stage):
     def clear_cache(self):
         "Periodical cache cleanup"
         self.stats.incr('beaconfilter/cleanups')
-        now = time()
-        self.last_cleanup = now
-        drop_at = now - self.max_time_between
-        for key, cache_entry in self.beacon_cache.items():
-            if cache_entry.timestamp < drop_at:
-                del self.beacon_cache[key]
-
+        drop_at = time() - self.min_time_between
+        drop = [
+            key
+            for key, cache_entry in self.beacon_cache.items()
+            if cache_entry.timestamp < drop_at
+        ]
+        self.log.info("Clearing beacon cache entries %d %r",
+                      len(drop), drop)
+        for key in drop:
+            del self.beacon_cache[key]
 
     def filter_beacon(self, entry):
         "Returns True to filter out entry"
         now = time()
         if now > self.last_cleanup + self.cleanup_interval:
             self.clear_cache()
+            self.last_cleanup = now
 
         if 'BEACON' not in entry['tags']:
             # Not a beacon, ignore
@@ -55,12 +60,12 @@ class BeaconFilterStage(Stage):
         # Read from cache, or add to cache
         key = (entry['src'], entry['ssid'])
         strength = entry[self.strength_field]
-        timestamp = entry[self.timestamp_field]
+        timestamp = time()
 
         cache = self.beacon_cache.get(key, None)
         if not cache:
             self.stats.incr('beaconfilter/cache_miss')
-            cache_entry = CacheEntry(timestamp=entry[self.timestamp_field],
+            cache_entry = CacheEntry(timestamp=time(),
                                      strength=strength)
             self.beacon_cache[key] = cache_entry
             return False
@@ -68,7 +73,7 @@ class BeaconFilterStage(Stage):
             self.stats.incr('beaconfilter/cache_hit')
 
         def update_cache():
-            cache_entry = CacheEntry(timestamp=entry[self.timestamp_field],
+            cache_entry = CacheEntry(timestamp=time(),
                                      strength=strength)
             self.beacon_cache[key] = cache_entry
 
@@ -79,7 +84,7 @@ class BeaconFilterStage(Stage):
 
         # Update case 2 - time elapsed
         time_elapsed = timestamp - cache.timestamp
-        if time_elapsed.total_seconds() >= self.max_time_between:
+        if time_elapsed >= self.min_time_between:
             update_cache()
             return False
 
@@ -97,11 +102,10 @@ class BeaconFilterStage(Stage):
 
     @classmethod
     def from_config(cls, config, stats):
-        "Build beaconfilter stage"
         cfg = {
-            'cleanup_interval': config.get('cleanup_interval', 600),
+            'cleanup_interval': config.get('cleanup_interval', 60),
             'max_strength_deviation': config.get('max_strength_deviation', 15),
-            'max_time_between': config.get('max_time_between', 120),
+            'min_time_between': config.get('min_time_between', 120),
             'timestamp_field': config.get('timestamp_field', 'timestamp'),
             'strength_field': config.get('strength_field', 'strength'),
         }
