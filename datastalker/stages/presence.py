@@ -1,6 +1,10 @@
 from time import time
 
-from datastalker.pipeline import Stage, Pipeline
+from datastalker.pipeline import (
+    Message,
+    Stage,
+    Pipeline
+)
 
 class _State:
     def __init__(self, key, now, packet):
@@ -56,7 +60,7 @@ class _State:
         if len(self.strengths) < 1000:
             self.strengths[now] = packet['strength']
 
-class Event:
+class Event(Message):
     """
     Represents a presence event.
     """

@@ -1,10 +1,10 @@
-# (C) 2015 - 2017 by Tomasz bla Fortuna
+# (C) 2015 - 2019 by Tomasz bla Fortuna
 # License: MIT
 
 import logging
 from time import time
 
-from datastalker.pipeline import SourceStage
+from datastalker.pipeline import SourceStage, StopPipeline
 
 from . import log
 from .stats import Stats
@@ -13,10 +13,6 @@ class Pipeline:
     """
     Creates a pipeline and handles flow of the data within the logger.
     """
-
-    class StopPipeline(Exception):
-        "Raised in stages to stop pipeline cleanly"
-        pass
 
     def __init__(self):
         self._stages = []
@@ -35,26 +31,21 @@ class Pipeline:
         log.warning('Entering pipeline')
         pipeline_start = time()
         try:
-            for entry in source.run():
+            for messages in source.run():
                 start = time()
                 for stage in operations:
-                    entry = stage.handle(entry)
+                    messages = stage.handle_bulk(messages)
 
-                    if entry is None:
-                        # Stop iteration of this entry
+                    if not messages:
+                        # Stop iteration of this message - None or []
                         self.stats.incr('pipeline/dropped')
                         break
-
-                    if not isinstance(entry, dict) and not isinstance(entry, list):
-                        log.error("Stage %s returned invalid entry type: %s",
-                                  stage, type(entry))
-                        raise Pipeline.StopPipeline("Pipeline Error")
 
                 took = time() - start
                 self.stats.incr('pipeline/entries')
                 self.stats.incr('pipeline/stages_total_s', took)
 
-        except Pipeline.StopPipeline as e:
+        except StopPipeline as e:
             log.info("Pipeline stopped on software request: %s", e.args[0])
         except KeyboardInterrupt:
             log.info("Pipeline stopped on keyboard request")

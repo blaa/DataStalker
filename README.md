@@ -1,13 +1,15 @@
 DataStalker
 ============
 
-Project status: Basic setups work.
+Project status: Basic setups work. I use it for presence detection in home made
+alarm system.
 
 Conceptually this project is based on the WifiStalker but is simplified
 according to the "Unix philosophy" - do one thing and do it well.
 
-- Gather packets from one of few sources (802.11 monitoring, ethernet packet sniffing),
-- decorate them with metadata,
+- Gather packets from one of few sources (802.11 monitoring, ethernet packet
+  sniffing),
+- Decorate them with metadata,
 - store for analysis in one or many databases.
 
 
@@ -15,17 +17,19 @@ Pipeline
 ============
 
 Data is read and converted using a simple linear pipeline - which connects one
-or more stages. For example:
+or more stages. Stages pass between them "messages" which represent packets or
+events. 
 
-  [Wifi Sniffer] -> [Beacon filter] -> [Geolocalization] -> [ElasticSearch]
+Example:
+
+  [Wifi Sniffer] -> [Beacon filter] -> [OUI decoder] -> [ElasticSearch]
 
 Wifi Sniffer is a "source stage" which produces initial data. This data is later
 filtered and decorated with two other stages, to be finally stored in the
 ElasticSearch database by the last stage.
 
-So... it's mostly wifistalker split into stages so that I can do metadata
-analysis using Kibana&Elasticsearch. Kind of like logstash for wifi/bt metadata
-and easy hacking.
+This approach allows to freely design pipeline stages and do analysis outside
+using ELK stack. It's relatively painless to add new stage. 
 
 Usage
 ============

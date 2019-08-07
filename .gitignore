@@ -4,3 +4,4 @@ __pycache__
 .#*
 *.bak
 misc/oui.txt
+config.local.yaml

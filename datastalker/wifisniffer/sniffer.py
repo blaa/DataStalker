@@ -4,7 +4,6 @@
 import os
 import sys
 from time import time
-from IPython import embed
 
 from scapy import config, sendrecv
 
@@ -12,6 +11,7 @@ from .hopper import Hopper
 from .parser import PacketParser
 
 from . import log
+
 
 class Sniffer:
     "Channel hopping, packet sniffing, parsing and finally storing"
@@ -68,31 +68,35 @@ class Sniffer:
             # thread and use prn argument.
             pkts = sendrecv.sniff(iface=self.interface, count=20, timeout=0.1)
             pkts_all += len(pkts)
-            for pkt in pkts:
-                data = self.packet_parser.parse(pkt)
-                if data is None:
+            output = []
+
+            for raw_pkt in pkts:
+                packet = self.packet_parser.parse(raw_pkt)
+                if packet is None:
                     continue
 
                 # Decorate with current hopper configuration
                 if self.hopper is not None:
-                    data['channel_hopper'] = self.hopper.channel_number
+                    packet['channel_hopper'] = self.hopper.channel_number
                 else:
-                    data['channel_hopper'] = -1
+                    packet['channel_hopper'] = -1
 
-                data['sniffer'] = self.sniffer_name
+                packet['sniffer'] = self.sniffer_name
 
-                if ('PROBE_REQ' in data['tags'] or
-                    'PROBE_RESP' in data['tags'] or
-                    'ASSOC_REQ' in data['tags'] or
-                    'DISASS' in data['tags']):
+                if ('PROBE_REQ' in packet['tags'] or
+                    'PROBE_RESP' in packet['tags'] or
+                    'ASSOC_REQ' in packet['tags'] or
+                    'DISASS' in packet['tags']):
                     # Increase karma when client traffic is detected
                     self.hopper.increase_karma()
 
                 # Lists are serializable, sets no - convert.
-                data['tags'] = list(data['tags'])
+                packet['tags'] = list(packet['tags'])
 
                 self.stats.incr('wifisniffer/frames')
-                yield data
+                output.append(packet)
+
+            yield output
 
             # Show stats
             now = time()

@@ -8,7 +8,11 @@ Basic stages which might be used in pipelines.
 from time import time
 from pprint import pprint
 
-from datastalker.pipeline import Stage, Pipeline
+from datastalker.pipeline import (
+    Stage,
+    Pipeline,
+    StopPipeline
+)
 
 from . import log
 
@@ -72,7 +76,7 @@ class LimitStage(Stage):
             if took > self.time_limit:
                 raise Pipeline.StopPipeline("Time limit reached")
         if self.entry_limit is not None and self.entry_cnt > self.entry_limit:
-            raise Pipeline.StopPipeline("Entry limit reached")
+            raise StopPipeline("Entry limit reached")
 
         self.entry_cnt += 1
         return entry
