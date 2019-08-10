@@ -60,6 +60,7 @@ class _State:
         if len(self.strengths) < 1000:
             self.strengths[now] = packet['strength']
 
+
 class Event(Message):
     """
     Represents a presence event.
@@ -76,6 +77,9 @@ class Event(Message):
     def __repr__(self):
         s = "<Event {0.src} {0.event_type} {0.state}>"
         return s.format(self)
+
+    def __str__(self):
+        return repr(self)
 
 
 @Pipeline.register_stage('presence')
@@ -145,9 +149,6 @@ class PresenceStage(Stage):
         for key in absent:
             del self.states[key]
 
-        if absent:
-            self.log.info("EVENT DEL ABSENT %r", events)
-
         return events
 
     def handle(self, packet):
@@ -165,10 +166,7 @@ class PresenceStage(Stage):
             events += self.handle_absent()
             self.cleanup_ts = now
 
-        if not events:
-            return None
-        else:
-            return events
+        return events
 
     @classmethod
     def from_config(cls, config, stats):
@@ -180,4 +178,3 @@ class PresenceStage(Stage):
         stage = PresenceStage(stats, **cfg)
         print("CREATED")
         return stage
-

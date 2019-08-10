@@ -1,9 +1,10 @@
 # (C) 2015 - 2017 by Tomasz bla Fortuna
 # License: MIT
 
-from datastalker.pipeline import Stage, Pipeline
+from datastalker.pipeline import Stage, Pipeline, Message
 from datastalker.elasticsearch import model
 from . import log
+
 
 @Pipeline.register_stage('elasticsearch')
 class ElasticSearchStage(Stage):

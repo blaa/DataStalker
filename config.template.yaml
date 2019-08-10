@@ -22,7 +22,7 @@ pipeline:
 
   #- limit:
   #    seconds: 10
-  #    entries: 1
+  #    messages: 1
 
   - beacon_filter:
       cleanup_interval: 600

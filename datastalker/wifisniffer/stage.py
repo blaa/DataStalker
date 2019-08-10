@@ -15,24 +15,6 @@ class SnifferMessage(Message):
 
     TODO: Manage schema for elasticsearch here.
     """
-    def __init__(self, packet):
-        self.pkt = packet
-
-    # Compatibility interface
-    def __getitem__(self, key):
-        return self.pkt[key]
-
-    def __setitem__(self, key, value):
-        self.pkt[key] = value
-
-    def __delitem__(self, key):
-        del self.pkt[key]
-
-    def __contains__(self, key):
-        return key in self.pkt
-
-    def keys(self):
-        return self.pkt.keys()
 
 
 @Pipeline.register_stage('wifi_sniffer')

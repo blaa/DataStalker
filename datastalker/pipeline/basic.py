@@ -1,10 +1,11 @@
-# (C) 2015 - 2017 by Tomasz bla Fortuna
+# (C) 2015 - 2019 by Tomasz bla Fortuna
 # License: MIT
 
 """
 Basic stages which might be used in pipelines.
 """
 
+import sys
 from time import time
 from pprint import pprint
 
@@ -16,16 +17,21 @@ from datastalker.pipeline import (
 
 from . import log
 
+
 @Pipeline.register_stage('print')
 class PrintStage(Stage):
     """Print all data passing this stage"""
-    def handle(self, entry):
-        pprint(entry)
-        return entry
+    def __init__(self, prefix):
+        self.prefix = prefix
+
+    def handle(self, message):
+        sys.stdout.write(self.prefix + str(message) + "\n")
+        sys.stdout.flush()
+        return message
 
     @classmethod
     def from_config(cls, config, stats):
-        stage = PrintStage()
+        stage = PrintStage(config.get('prefix', ''))
         return stage
 
 
@@ -37,18 +43,18 @@ class StripStage(Stage):
         self.keys = keys
         self.stats = stats
 
-    def handle(self, entry):
+    def handle(self, message):
         ks = self.keys_startswith
-        for k in list(entry.keys()):
+        for k in list(message.keys()):
             if ks is not None and k.startswith(ks):
-                del entry[k]
+                del message[k]
                 self.stats.incr('stripstage/stripped_by_prefix')
 
         for key in self.keys:
-            if key in entry:
-                del entry[key]
+            if key in message:
+                del message[key]
                 self.stats.incr('stripstage/stripped_by_name')
-        return entry
+        return message
 
     @classmethod
     def from_config(cls, config, stats):
@@ -62,33 +68,33 @@ class StripStage(Stage):
 @Pipeline.register_stage('limit')
 class LimitStage(Stage):
     """Stop pipeline when the limit is reached"""
-    def __init__(self, time_limit=None, entry_limit=None):
+    def __init__(self, time_limit=None, message_limit=None):
         self.time_limit = time_limit
-        self.entry_limit = entry_limit
+        self.message_limit = message_limit
 
         self.start_time = time()
-        self.entry_cnt = 0
+        self.message_cnt = 0
 
-    def handle(self, entry):
+    def handle(self, message):
         "Raise StopPipeline when 1 of 2 possible events are triggered"
         if self.time_limit is not None:
             took = time() - self.start_time
             if took > self.time_limit:
                 raise Pipeline.StopPipeline("Time limit reached")
-        if self.entry_limit is not None and self.entry_cnt > self.entry_limit:
-            raise StopPipeline("Entry limit reached")
+        if self.message_limit is not None and self.message_cnt > self.message_limit:
+            raise StopPipeline("Message limit reached")
 
-        self.entry_cnt += 1
-        return entry
+        self.message_cnt += 1
+        return message
 
     @classmethod
     def from_config(cls, config, stats):
         "Build limitstage"
         seconds = config.get('seconds', None)
-        entries = config.get('entries', None)
+        entries = config.get('messages', None)
         if seconds is None and entries is None:
             raise Exception("Limit stage requires seconds or entries config")
 
         stage = LimitStage(time_limit=seconds,
-                           entry_limit=entries)
+                           message_limit=entries)
         return stage

@@ -10,19 +10,42 @@ from . import StopPipeline
 class Message:
     """
     Base class which represents information passed within the Pipeline.
+
+    Implements dict-like interface, should be simple and extendable.
+
+    Should allow subclasses to support data and schema (elasticsearch schema).
     """
+    def __init__(self, data):
+        self.data = data
+
+    # Dict-like interface
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+
+    def __delitem__(self, key):
+        del self.data[key]
+
+    def __contains__(self, key):
+        return key in self.data
+
+    def keys(self):
+        return self.data.keys()
+
+    # Debug interface
     def __str__(self):
         "Used for printing to stdout"
-        raise NotImplementedError
+        def format_dict(d):
+            if not isinstance(d, dict):
+                return repr(d)
+            return " ".join("{}={}".format(key, format_dict(value))
+                            for key, value in d)
+        return repr(self.data)
 
     def __repr__(self):
-        raise NotImplementedError
-
-    def serialize(self):
-        """
-        Return a dictionary representation
-        """
-        raise NotImplementedError
+        return "<Message %r>" % self.data
 
 
 class Stage:
