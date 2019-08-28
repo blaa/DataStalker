@@ -53,8 +53,8 @@ pipeline:
       index_template: 'ds-%Y%m%d'
 
       mapping:
-        # By default there's internal default mapping defined.
-        # _use_default_mapping: false
+        # Base mapping on the source stage mapping.
+        # use_default_mapping: false
 
         # Can define with shortcut:
         # str, str_analyzed, str_not_analyzed

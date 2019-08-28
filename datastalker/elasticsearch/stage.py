@@ -2,22 +2,38 @@
 # License: MIT
 
 from datastalker.pipeline import Stage, Pipeline, Message
-from datastalker.elasticsearch import model
+from datastalker.elasticsearch import model, schema
 from . import log
+
+class ElasticMessage(Message):
+    """
+    Add support for elasticsearch schemas
+    """
+    SHARDS = 1
+    CODEC = "best_compression"
+
+    MAPPING = {
+        # Date in UTC for Kibana
+        "timestamp": schema.DATE,
+    }
+
+    def get_mapping(self):
+        return self.MAPPING.copy()
 
 
 @Pipeline.register_stage('elasticsearch')
-class ElasticSearchStage(Stage):
+class ElasticStage(Stage):
     "Connect sniffer code to pipeline as a sourcestage"
 
-    def __init__(self, db, stats):
-        self.db = db
+    def __init__(self, storage, stats):
+        self.storage = storage
         self.stats = stats
 
-    def handle(self, entry):
-        self.db.store(entry)
+    def handle(self, message):
+        assert isinstance(message, ElasticMessage)
+        self.storage.store(message)
         self.stats.incr('elasticsearch/stored')
-        return entry
+        return message
 
     @classmethod
     def from_config(cls, config, stats):
@@ -29,11 +45,11 @@ class ElasticSearchStage(Stage):
         index_template = config.get('index_template')
         time_field = config.get('time_field')
 
-        db = model.ElasticStorage(hosts,
-                                  index_template,
-                                  time_field,
-                                  mapping)
+        storage = model.ElasticStorage(hosts,
+                                       index_template,
+                                       time_field,
+                                       mapping)
 
-        stage = ElasticSearchStage(db, stats)
+        stage = ElasticSearchStage(storage, stats)
         log.info("Elasticsearch stage initialized")
         return stage

@@ -1,3 +1,4 @@
+# Constants for schema definition
 
 # Basic types
 STR_ANALYZED = {"type": "text"}

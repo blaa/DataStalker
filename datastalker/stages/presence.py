@@ -31,6 +31,8 @@ class _State:
     def get_avg_strength(self):
         "Calculate average strength"
         strengths = list(self.strengths.values())
+        if not strengths:
+            return None
         avg_strength = sum(strengths) / len(strengths)
         return avg_strength
 
@@ -57,7 +59,7 @@ class _State:
         for tag in packet['tags']:
             self.tags.add(tag)
 
-        if len(self.strengths) < 1000:
+        if len(self.strengths) < 1000 and packet['strength'] is not None:
             self.strengths[now] = packet['strength']
 
 

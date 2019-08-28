@@ -6,7 +6,7 @@ from time import time
 import datetime
 
 from scapy.layers.dot11 import Dot11Beacon
-from scapy.layers.dot11 import Dot11WEP, Dot11Elt, Dot11FCS
+from scapy.layers.dot11 import Dot11WEP, Dot11Elt, Dot11FCS, Dot11
 from scapy.layers.dot11 import Dot11ProbeReq, Dot11ProbeResp, Dot11Deauth, Dot11Auth
 from scapy.modules import p0f
 
@@ -30,13 +30,17 @@ class PacketParser:
         data['_pkt'] = p
         return data
 
-
     def _parse_dot11(self, data, p):
         "Parse Dot11/Dot11Elt layers adding data to dict created during radiotap parse"
         tags = data['tags']
 
         # http://www.wildpackets.com/resources/compendium/wireless_lan/wlan_packet_types
         dot11 = p.getlayer(Dot11FCS)
+        if dot11 is None:
+            dot11 = p.getlayer(Dot11)
+
+        if dot11 is None:
+            print("Unable to read Dot11/Dot11FSC layer", repr(p))
 
         d_type = dot11.type
         d_subtype = dot11.subtype
@@ -130,12 +134,21 @@ class PacketParser:
 
 
     def _sanitize(self, s):
-        "Parse SSID fields"
+        """
+        Parse SSID fields
+
+        They can get messy. Don't kill the process trying to hard.
+        """
         try:
-            x = s.decode('utf-8')
+            return s.decode('utf-8')
         except:
-            x = ''.join([i if ord(i) < 128 else ' ' for i in s])
-        return x
+            pass
+
+        try:
+            return ''.join(chr(i) if i < 128 else ' ' for i in s)
+        except (TypeError, ValueError):
+            return repr(s)
+
 
     def _parse_radiotap(self, p):
         "Handle data from radiotap header"

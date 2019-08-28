@@ -61,6 +61,7 @@ class BeaconFilterStage(Stage):
         key = (entry['src'], entry['ssid'])
         strength = entry[self.strength_field]
         timestamp = time()
+        strength = -100 if strength is None else strength
 
         cache = self.beacon_cache.get(key, None)
         if not cache:
